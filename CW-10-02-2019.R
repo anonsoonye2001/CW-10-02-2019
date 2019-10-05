@@ -56,3 +56,23 @@ v<-seq(5,20,0.5)
 v
 vc<-cut(x=v,breaks=seq(5,20,1),include.lowest = T)
 vc
+##merge I
+?merge()
+mt<-merge(x=m1, y=m2,by=c("transect.id","seq"),all.x=T,no.dups=T)
+nrow(m1)+nrow(m2)
+##join
+library(dplyr)
+mj<-dplyr::right_join(x=m1,y=m2,by=c('transect.id'))
+nrow(m1)+nrow(m2)
+nrow(mt)
+
+
+#summarizing data
+#2 Oct 2019
+#-----
+library(tidyverse)
+install.packages("nutshell")
+library(nutshell)
+#data we will be using today
+data("battling.2008")
+d<-battling.2008
