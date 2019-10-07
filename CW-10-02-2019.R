@@ -169,3 +169,87 @@ head(s)
 #use the "cast" function to change data frame from the long to wide format
 s.wide<-dcast(data=s,formula=lgID~teamID,fun.aggregate = mean)
 s.wide<-dcast(data=s,value.var="HR",formula=lgID~teamID,fun.aggregate = mean)
+
+
+#class: reshape
+load("fish_data.Rdata")
+f<-fish;rm(fish)
+names(f)
+fs<-f[,c("transect.id","area_fac","depth_fac",
+         "parcel.id","parcel.density.m3","parcel.length.m")]
+#how to rename a field(or column)
+library(tidyverse)
+fs<-rename(.data=fs,tid=transect.id)
+names(fs)
+fs<-rename(.data=fs,tid=transect.id)
+fs<-rename(.data=fs,area=area_fac)
+fs<-rename(.data=fs,depth=depth_fac)
+fs<-rename(.data=fs,pid=parcel.id)
+fs<-rename(.data=fs,pl=parcel.length.m)
+fs<-rename(.data=fs,pd=parcel.density.m3)
+
+#another way to rename columns
+names(fs)[1]=c("transect")
+names(fs)[1:3]=c(transect"a","z")
+
+#reshaping your data-----
+library(reshape2)
+#using the function 'melt'(reshape2)to change your
+#data frame from wide to a long format
+?melt
+fs.melt<-melt(data=fs,id.vars = c("tid","pid","area","depth"),
+              mearsure.vars=c("pl","pd"))
+head(fs.melt)
+unique(fs.melt$variable)
+fs.melt<-melt(data=fs,id.vars = c("tid","pid","area","depth"),
+              mearsure.vars=c("pl","pd"),value.name=c("numbers"))
+fs.m$variable<-as.character()
+
+#using dcast function to transform your data from long to the wide format
+?dcast
+fs.cast<-dcast(data=fs.melt,formula=tid~variable,value.var = c("numbers"),
+               fun.aggregate = mean)
+head(fs.cast)
+
+#spread and gather(tidyverse)
+fs.gather=fs%>%group_by(tid,area,depth,pid)%>%
+  gather(key='variable',value='value',pd,pl)
+fs.spread=fs.gather%>%spread(variable,value)
+
+#TBD-----
+fs.spread=fs.gather
+
+#removingg duplicates-----
+o1<-fs[1,]
+o2<-fs[1,]
+o3<-fs[1,]
+o4<-fs[2:10,]
+#bind thes individual objects back together using functiom "rbind"
+o<-rbind(o1,o2,o3,o4)
+
+#now the first 3 rows are duplicate observations
+no.dups<-o[!duplicated(o),]
+dups<-o[duplicated(o),]
+dups
+
+?complete.cases   # return datas without NAs.
+
+#data with observations missing(NAs)
+fs[2,]$pd<-NA
+fs[4,]$pl<-NA
+fs.complete<-complete.cases(fs)
+head(fs.complete)
+fs.comlete<-fs[complete.cases(fs),]
+
+# sorting data
+attach(mtcars)
+#sort by mpg
+nd<-mtcars[order(mpg),]
+#using the arrange function
+nd.arrange<-arrange(.data=mtcars,mpg)# ascending
+nd.arrange
+nd.arrange.desc<-arrange(.data=mtcars,desc(mpg)# descending
+
+nd.M.c<-arrange(.data=mtcars,mpg,cyl) # ascending      
+nd.M.c<-arrange(.data=mtcars,mpg,desc(cyl)) # mpg ascending; cyl descending
+                         
