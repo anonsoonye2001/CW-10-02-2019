@@ -74,5 +74,98 @@ library(tidyverse)
 install.packages("nutshell")
 library(nutshell)
 #data we will be using today
-data("battling.2008")
-d<-battling.2008
+data("batting.2008")
+d<-batting.2008
+d
+
+#tapply---(tidyverse function)
+?tapply()
+hr<-tapply(x=d$HR,INDEX=list(d$teamID),FUN=sum)
+
+##find qualitile values for home runs by team
+##fivenum gives you:min, lower-hinge, median, upper-hinge, and max value
+hr.q<-tapply(x=d$HR,INDEX=list(d$teamID),FUN=sum)
+# one category summarize
+lg.q<-tapply(x=(d$H/d$AB),INDEX=list(d$lgID),FUN=fivenum)
+lg.q
+head(d$lgID)
+summary(d$H/d$AB)
+summary(d[d$lgID=="AL",]$H/d[d$lgID=="AL",]$AB)
+
+#two category summarize
+bats<- tapply(x=d$HR, INDEX=list(d$lgID,d$bats),FUN=mean)
+
+bats
+unique(d$bats)
+names(d)
+#three category summarize
+bats.team<- tapply(x=d$HR, INDEX=list(d$lgID,d$teamID,d$bats),FUN=mean)
+bats.team
+#aggregate------
+
+team.stats.sum<-aggregate(x=d,[c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=sum)
+team.stats.sum
+team.stats.mean<-aggregate(x=d,[c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=mean)
+team.stats.mean
+
+
+#tidyverse summarise()----
+team.sum=summarise(.data=d,)
+team.sum=d%>%group_by(teamID)%>%summarise(ABsum=sum(AB),ABmean=mean(AB),
+                                          ABsd=sd(AB),ABcount=n())
+lg.team.sum=d%>%group_by(lgID,teamID)%>%summarise(ABsum=sum(AB),ABmean=mean(AB),
+                                                  ABsd=sd(AB),ABcount=n())
+
+head(team.sum)
+str(team.sum)
+team.sum$ABsum
+
+#rowsum----
+#when you just want to add up the values in each row
+
+rs<-rowsum(d[,c("AB","H","HR","2B","3B")],group=d$teamID)
+rs
+
+#counting variables
+#use the function "tabulate"
+HR.cnts<-tabulate(d$HR)
+names(HR.cnts)<-0:(length(HR.cnts)-1)
+#table-----
+table(d$bats)
+table(d[,c("bats","throws")])
+length(HR.cnts)
+HR.cnts
+length(d$teamID)
+(unique(d$teamIlengthD))
+
+#aside about the 'names' function------
+m<-matrix(nrow=4,ncol=3)
+colnames(m)<-c("one","two","three")
+rownames(m)<-c("apple","pear","orange","berry")
+m
+#reshaping your data----
+n<-matrix(1:10,nrow=5)
+
+t(n)
+
+v<-1:10
+v
+t(v)
+str(t(v))
+
+#unstack and stack----
+
+s<-d[,c("lgID","teamID","AB","HR","throws")]
+head(s)
+s.un<-unstack(x=s,form=teamID~HR)
+
+s.un<-unstack(x=s,form=HR~AB)
+
+#melt and cast-----
+library(reshape2)
+
+
+head(s)
+#use the "cast" function to change data frame from the long to wide format
+s.wide<-dcast(data=s,formula=lgID~teamID,fun.aggregate = mean)
+s.wide<-dcast(data=s,value.var="HR",formula=lgID~teamID,fun.aggregate = mean)
