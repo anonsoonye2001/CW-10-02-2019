@@ -75,22 +75,27 @@ install.packages("nutshell")
 library(nutshell)
 #data we will be using today
 data("batting.2008")
+
 d<-batting.2008
 d
 
 #tapply---(tidyverse function)
+#find the sum of all home runs
 ?tapply()
 hr<-tapply(x=d$HR,INDEX=list(d$teamID),FUN=sum)
 
-##find qualitile values for home runs by team
+##find quantile values for home runs by team
 ##fivenum gives you:min, lower-hinge, median, upper-hinge, and max value
-hr.q<-tapply(x=d$HR,INDEX=list(d$teamID),FUN=sum)
+hr.q<-tapply(x=d$HR,INDEX=list(d$teamID),FUN=fivenum)
+
 # one category summarize
 lg.q<-tapply(x=(d$H/d$AB),INDEX=list(d$lgID),FUN=fivenum)
 lg.q
 head(d$lgID)
 summary(d$H/d$AB)
 summary(d[d$lgID=="AL",]$H/d[d$lgID=="AL",]$AB)
+or 
+summary(al.hits/al.bats)
 
 #two category summarize
 bats<- tapply(x=d$HR, INDEX=list(d$lgID,d$bats),FUN=mean)
@@ -98,14 +103,14 @@ bats<- tapply(x=d$HR, INDEX=list(d$lgID,d$bats),FUN=mean)
 bats
 unique(d$bats)
 names(d)
-#three category summarize
+#three category summarize (crazy array)
 bats.team<- tapply(x=d$HR, INDEX=list(d$lgID,d$teamID,d$bats),FUN=mean)
 bats.team
 #aggregate------
 
-team.stats.sum<-aggregate(x=d,[c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=sum)
+team.stats.sum<-aggregate(x=d[,c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=sum)
 team.stats.sum
-team.stats.mean<-aggregate(x=d,[c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=mean)
+team.stats.mean<-aggregate(x=d[,c("AB","H","BB","2B","HR")],by=list(d$teamID),FUN=mean)
 team.stats.mean
 
 
@@ -130,13 +135,14 @@ rs
 #use the function "tabulate"
 HR.cnts<-tabulate(d$HR)
 names(HR.cnts)<-0:(length(HR.cnts)-1)
+
 #table-----
 table(d$bats)
 table(d[,c("bats","throws")])
 length(HR.cnts)
 HR.cnts
 length(d$teamID)
-(unique(d$teamIlengthD))
+length(unique(d$teamID))
 
 #aside about the 'names' function------
 m<-matrix(nrow=4,ncol=3)
@@ -158,7 +164,7 @@ str(t(v))
 s<-d[,c("lgID","teamID","AB","HR","throws")]
 head(s)
 s.un<-unstack(x=s,form=teamID~HR)
-
+s.un
 s.un<-unstack(x=s,form=HR~AB)
 
 #melt and cast-----
@@ -167,9 +173,9 @@ library(reshape2)
 
 head(s)
 #use the "cast" function to change data frame from the long to wide format
-s.wide<-dcast(data=s,formula=lgID~teamID,fun.aggregate = mean)
 s.wide<-dcast(data=s,value.var="HR",formula=lgID~teamID,fun.aggregate = mean)
-
+s.wide<-dcast(data=s,value.var="HR",formula=lgID~teamID,fun.aggregate = mean)
+s.wide
 
 #class: reshape
 load("fish_data.Rdata")
@@ -181,7 +187,6 @@ fs<-f[,c("transect.id","area_fac","depth_fac",
 library(tidyverse)
 fs<-rename(.data=fs,tid=transect.id)
 names(fs)
-fs<-rename(.data=fs,tid=transect.id)
 fs<-rename(.data=fs,area=area_fac)
 fs<-rename(.data=fs,depth=depth_fac)
 fs<-rename(.data=fs,pid=parcel.id)
@@ -234,7 +239,7 @@ dups
 
 ?complete.cases   # return datas without NAs.
 
-#data with observations missing(NAs)
+#complete.cases identify column with NAs i.e data with observations missing(NAs)
 fs[2,]$pd<-NA
 fs[4,]$pl<-NA
 fs.complete<-complete.cases(fs)
@@ -250,6 +255,9 @@ nd.arrange<-arrange(.data=mtcars,mpg)# ascending
 nd.arrange
 nd.arrange.desc<-arrange(.data=mtcars,desc(mpg)# descending
 
-nd.M.c<-arrange(.data=mtcars,mpg,cyl) # ascending      
-nd.M.c<-arrange(.data=mtcars,mpg,desc(cyl)) # mpg ascending; cyl descending
-                         
+nd.m.c<-arrange(.data=mtcars,mpg,desc(cyl)) # ascending      
+nd.m.c<-arrange(.data=mtcars,mpg,desc(cyl)) # mpg ascending; cyl descending
+
+
+fs.m<-melt(data=fs,id.vars=c("tid","area","depth"),measure.vars = c("pd","pl"),
+           value.name = c("data"),factorsAsStrings = F)
