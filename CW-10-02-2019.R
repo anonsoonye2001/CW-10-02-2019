@@ -150,13 +150,15 @@ HR.cnts
 names(HR.cnts)<-0:(length(HR.cnts)-1)
 names(HR.cnts)
 
-#table-----
-table(d$bats)
-table(d[,c("bats","throws")])
 length(HR.cnts)
 HR.cnts
 length(d$teamID)
 length(unique(d$teamID))
+
+
+#table-----
+table(d$bats)
+table(d[,c("bats","throws")])
 
 #assign about the 'names' function------
 m<-matrix(nrow=4,ncol=3)
@@ -211,15 +213,19 @@ fs
 
 #another way to rename columns
 names(fs)[1]=c("transect")
-names(fs)[1:3]=c(transect,a","z")  #?
+names(fs)[1:3]=c("transect",a","z")  #?
 
 #reshaping your data-----
 library(reshape2)
+
 #using the function 'melt'(reshape2)to change your
 #data frame from wide to a long format
 ?melt
-fs.melt<-melt(data=fs,id.vars = c("tid","pid","area","depth"), 
-              mearsure.vars=c("pl","pd"))
+fs
+
+fs.melt<-melt(data=fs,id.vars = c("tid","pid","area","depth"),
+                  measure.vars=c("pl","pd"))
+fs.melt
 head(fs.melt)
 unique(fs.melt$variable)
 
@@ -227,14 +233,14 @@ fs.m$variable<-as.character()
 
 #using dcast function to transform your data from long to the wide format--
 ?dcast
-fs.cast<-dcast(data=fs.melt,formula=tid~variable,value.var = c("numbers"),
+fs.cast<-dcast(data=fs.melt,formula=tid~variable,value.var = "numbers",
                fun.aggregate = mean)
 head(fs.cast)
 
 #spread and gather(tidyverse)
 
-fs.gather=fs%>%group_by(tid,area,depth,pid)%>%
-  gather(key="variable"",value="value",pd,pl)
+fs.gather=fs%>%group_by(tid,area,depth,pid)%>%gather(key="variable",value="value",pd,pl)
+fs.gather
 
 fs.spread=fs.gather%>%spread(variable,value)
 
@@ -282,4 +288,5 @@ nd.arrange.desc
 
 
 nd.m.c<-arrange(.data=mtcars,mpg,desc(cyl)) # mpg ascending; cyl descending
+nd.m.c
 
